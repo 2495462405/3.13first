@@ -8,38 +8,42 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
-
 using namespace cv;
 using namespace std;
 int main(int argc, const char * argv[]) {
     
     
-    VideoCapture cap;
+    VideoCapture cap(0);
     
-    cap.open(0);
+    double scale=0.5;
+    double i_minH=0;
+    double i_maxH=20;
+    double i_minS=43;
+    double i_maxS=255;
+    double i_minV=55;
+    double i_maxV=255;
     
-    if(!cap.isOpened())
+    while(1)
     {
-        std::cout<<"不能打开视频文件"<< std::endl;
-        return-1;
-    }
-    
-    double fps = cap.get(CAP_PROP_FPS);
-    std::cout <<"fps" << fps << std::endl;
-    while (1)
-    {
-        cv::Mat frame;
-        bool rSucess = cap.read(frame);
-        if (!rSucess)
-        {
-            std::cout <<"不能从视频文件中读取帧" << std::endl;
-            break;
-        }
-        else
-        {
-            cv::imshow("frame",frame);
-        }
-    }
+        Mat frame;
+        Mat hsvMat;
+        Mat detectMat;
+        
+        cap>>frame;
+        Size ResImgsiz = Size(frame.cols*scale,frame.rows*scale);
+        Mat rFrame=Mat(ResImgsiz,frame.type());
+        resize(frame,rFrame,ResImgsiz,INTER_LINEAR);
+        
+        cvtColor(rFrame,hsvMat,COLOR_BGR2HSV);
+        
+        rFrame.copyTo(detectMat);
+        
+  cv::inRange(hsvMat,Scalar(i_minH,i_minS,i_minV),Scalar(i_maxH,i_maxS,i_maxV),detectMat);
+        
+        imshow("whie: in the range",detectMat);
+        imshow("frame",rFrame);
+        
         waitKey(30);
-        return 0;
+        
+    }
     }
